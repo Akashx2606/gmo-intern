@@ -118,7 +118,7 @@ const Table: React.FC = () => {
           }
           setSelectedRows(updated);
         }}
-        selectionMode="multiple" // 👈 this fixes the TS overload issue
+        selectionMode="multiple" 
       >
         <Column
           selectionMode="multiple"
