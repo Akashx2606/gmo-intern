@@ -1,3 +1,6 @@
+
+
+
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
@@ -29,7 +32,7 @@ const Table: React.FC = () => {
 
   const op = useRef<OverlayPanel>(null);
 
-// fetch the data
+  // fetch the data
   const fetchData = async (pageNum: number = 1) => {
     setLoading(true);
     try {
@@ -51,9 +54,7 @@ const Table: React.FC = () => {
     setPage(event.page + 1);
   };
 
-  
-
-  
+  // select N rows across pages
   const selectNRowsAcrossPages = async (select: boolean) => {
     let totalNeeded = parseInt(rowsToSelect, 10);
     if (isNaN(totalNeeded) || totalNeeded <= 0) return;
@@ -64,7 +65,6 @@ const Table: React.FC = () => {
     collected = [...artworks.slice(0, takeFromCurrent)];
     totalNeeded -= takeFromCurrent;
 
-    
     let nextPage = page + 1;
     while (totalNeeded > 0) {
       try {
@@ -85,7 +85,7 @@ const Table: React.FC = () => {
       }
     }
 
-    // update 
+    // update selection state
     setSelectedRows((prev) => {
       const next = { ...prev };
       for (const r of collected) {
@@ -98,8 +98,6 @@ const Table: React.FC = () => {
     op.current?.hide();
   };
 
- 
-
   return (
     <div>
       <DataTable
@@ -111,41 +109,59 @@ const Table: React.FC = () => {
         first={(page - 1) * PAGE_LIMIT}
         onPage={onPageChange}
         loading={loading}
-        dataKey="id" 
-        selection={artworks.filter((a) => selectedRows[a.id])} 
-        onSelectionChange={(e: { value: Artwork[] }) => {
+        dataKey="id"
+        selection={artworks.filter((a) => selectedRows[a.id])}
+        onSelectionChange={(e) => {
           const updated: { [key: number]: boolean } = {};
-          for (const row of e.value) {
+          for (const row of e.value as Artwork[]) {
             updated[row.id] = true;
           }
           setSelectedRows(updated);
         }}
+        selectionMode="multiple" // 👈 this fixes the TS overload issue
       >
         <Column
-         selectionMode="multiple" 
-         header={<div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      
-      <OverlayPanel ref={op}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "6px" }}>
-          <InputText
-            placeholder="Enter number..."
-            value={rowsToSelect}
-            onChange={(e) => setRowsToSelect(e.target.value)}
-          />
-          <div style={{ display: "flex", gap: "6px" }}>
-            <Button label="Select" onClick={() => selectNRowsAcrossPages(true)} />
-            <Button label="Deselect" severity="danger" onClick={() => selectNRowsAcrossPages(false)} />
-          </div>
-        </div>
-      </OverlayPanel>
-    </div>} />
-         
-        <Column 
-               header={<Button
-        icon="pi pi-chevron-down"
-        className="p-button-text p-button-sm"
-        onClick={(e) => op.current?.toggle(e)}
-      />}
+          selectionMode="multiple"
+          header={
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <OverlayPanel ref={op}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                    padding: "6px",
+                  }}
+                >
+                  <InputText
+                    placeholder="Enter number..."
+                    value={rowsToSelect}
+                    onChange={(e) => setRowsToSelect(e.target.value)}
+                  />
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <Button
+                      label="Select"
+                      onClick={() => selectNRowsAcrossPages(true)}
+                    />
+                    <Button
+                      label="Deselect"
+                      severity="danger"
+                      onClick={() => selectNRowsAcrossPages(false)}
+                    />
+                  </div>
+                </div>
+              </OverlayPanel>
+            </div>
+          }
+        />
+        <Column
+          header={
+            <Button
+              icon="pi pi-chevron-down"
+              className="p-button-text p-button-sm"
+              onClick={(e) => op.current?.toggle(e)}
+            />
+          }
         />
         <Column field="title" header="Title" />
         <Column field="place_of_origin" header="Origin" />
@@ -159,4 +175,3 @@ const Table: React.FC = () => {
 };
 
 export default Table;
-
